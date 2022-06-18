@@ -13,10 +13,9 @@ class Client:
         self.nonce = "0"
         self.token = token.replace('http://', '')
         self.config = json.loads(b64decode(token.split('.')[1] + '===='))
-        self.on = {}
+        self.event = {}
     
     def login(self):
-        websocket.enableTrace(True)
         self.ws = websocket.WebSocketApp('ws://' + self.config['host'] + '/gateway',
             on_open=self.onOpen,
             on_message=self.onMessage,
@@ -51,25 +50,35 @@ class Client:
     def onClose(self, ws, close_status_code, close_msg):
         print("REPLCRAFT CLOSED:", close_msg)
         print(close_status_code)
+
+    # Event Wrapper
+    def on(self, event):
+        def decorator(func):
+            self.event[event] = func
+            def wrapper(*args, **kwargs):
+                result = func(*args, **kwargs)
+                return result
+            return wrapper
+        return decorator
         
     # Event Listener
     def onMessage(self, ws, message):
         msg = json.loads(message)
-
+       
         # Check if error occured
-        if msg['ok'] == False:
+        if msg.get('ok', False) and msg['ok'] == False:
             print("ERROR:", msg)
             if msg.get('error', False):
-                if msg['error'] == 'out of fuel' and 'out of fuel' in self.on:
-                    self.on['out of fuel'](self, msg)
-                elif self.on.get('error', False): 
-                    self.on['error'](self, msg['error'], msg)
+                if msg['error'] == 'out of fuel' and 'out of fuel' in self.event:
+                    self.event['out of fuel'](self, msg)
+                elif self.event.get('error', False): 
+                    self.event['error'](self, msg['error'], msg)
         
         # Check if connection opened
-        if msg['nonce'] == '0': self.on['open'](self)  
+        if msg.get('nonce', False) == '0': self.event['open'](self)  
         
         # Transaction Handling
-        if 'transact' in self.on and msg.get('type', False) == 'transact': 
+        if 'transact' in self.event and msg.get('type', False) == 'transact': 
 
             # Accept and Deny functions
             def accept():
@@ -89,17 +98,19 @@ class Client:
 
             msg['accept'] = accept
             msg['deny'] = deny
+            # Split up message into arguments
+            msg['query'] = msg['query'].split(' ')
                 
             # Run event listener
-            self.on['transact'](self, msg)
+            self.event['transact'](self, msg)
 
         # Block Update Handling
-        elif 'block update' in self.on and msg.get('type', False) == 'block update':
-            self.on['block update'](self, msg['cause'], msg['block'], msg['x'], msg['y'], msg['z'])
+        elif 'block update' in self.event and msg.get('type', False) == 'block update':
+            self.event['block update'](self, msg['cause'], msg['block'], msg['x'], msg['y'], msg['z'])
 
         # Events
-        if msg.get('event', False) and 'event' in self.on['event']:
-            self.on['event'](self, msg['event'], msg['cause'], msg['block'], msg['x'], msg['y'], msg['z'])
+        if msg.get('event', False) and 'event' in self.event['event']:
+            self.event['event'](self, msg['event'], msg['cause'], msg['block'], msg['x'], msg['y'], msg['z'])
 
     #
     # Tell & Pay Functions
