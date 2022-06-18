@@ -1,5 +1,5 @@
 # replcraft-jarci
-Just Another Replcraft Implementation (*In Python!*)
+**J**ust **A**nother **R**epl**c**raft **I**mplementation (*In Python!*)
 
 ## Supports v1.5.0
 - Fuel Info API
