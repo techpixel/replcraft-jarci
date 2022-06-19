@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/replcraft/__init__.py
+src/replcraft/jarci.py
+src/replcraft_techpixel.egg-info/PKG-INFO
+src/replcraft_techpixel.egg-info/SOURCES.txt
+src/replcraft_techpixel.egg-info/dependency_links.txt
+src/replcraft_techpixel.egg-info/top_level.txt

@@ -1,0 +1,32 @@
+Metadata-Version: 2.1
+Name: replcraft-techpixel
+Version: 1.5.0.0
+Summary: Implementation of Replcraft in Python
+Home-page: https://github.com/pypa/sampleproject
+Author: techpixel
+Author-email: yralqfwus@mozmail.com
+Project-URL: Bug Tracker, https://github.com/pypa/sampleproject/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# replcraft-jarci
+**J**ust **A**nother **R**epl**c**raft **I**mplementation (*In Python!*)
+
+## Supports v1.5.0
+- Fuel Info API
+- moveItem Target Index Support
+- Transact Support
+
+## Note
+This library attempts to implement replcraft through a long-term connection system, similar to the javascript library, and is designed to be best utilized with the transact command. The downside to this is that it is not as versatile as a short term connection, and is more complicated. (Think of it as like writing a Flask web server)
+
+Try [replcraft-rexum](https://github.com/rexjohannes/replcraft-python) for a more versatile approach. This doesn't include transact support however.
+
+## To-do List
+- Refactor Code (include annotations, etc.)
+- Out of Fuel query retrying
+- Create documentation
