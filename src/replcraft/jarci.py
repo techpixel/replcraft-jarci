@@ -48,6 +48,9 @@ class Client:
         print("ERROR:", error)
     
     def onClose(self, ws, close_status_code, close_msg):
+        if 'close' in self.event:
+            self.event['close'](self)
+        
         print("REPLCRAFT CLOSED:", close_msg)
         print(close_status_code)
 
@@ -71,7 +74,7 @@ class Client:
             if msg.get('error', False):
                 if msg['error'] == 'out of fuel' and 'out of fuel' in self.event:
                     self.event['out of fuel'](self, msg)
-                elif self.event.get('error', False): 
+                elif 'error' in self.event: 
                     self.event['error'](self, msg['error'], msg)
         
         # Check if connection opened
