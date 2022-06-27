@@ -1,2 +1,4 @@
 language = "python3"
-run = "python examples/transact.py"
+run = "python transact.py"
+
+ignoredPackages = ["unit_tests", "websocket"]

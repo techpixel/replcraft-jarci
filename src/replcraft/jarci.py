@@ -14,6 +14,11 @@ class Client:
         self.token = token.replace('http://', '')
         self.config = json.loads(b64decode(token.split('.')[1] + '===='))
         self.event = {}
+
+        self.responseNonce = -1
+        self.responseFunc = False
+
+        self.queue = None
     
     def login(self):
         self.ws = websocket.WebSocketApp('ws://' + self.config['host'] + '/gateway',
@@ -29,6 +34,12 @@ class Client:
     def _send(self, data):
         self.ws.send(json.dumps(data))
         self.nonce = str(int(self.nonce) + 1)
+
+        self.queue = data
+
+    # Resend Function
+    def _resend(self, data):
+        self.ws.send(json.dumps(data))
 
     # Disconnect Function
     def disconnect(self):
@@ -67,12 +78,20 @@ class Client:
     # Event Listener
     def onMessage(self, ws, message):
         msg = json.loads(message)
-       
+
+        print(msg)
+
+        if msg.get('nonce', False) == self.responseNonce and self.responseFunc:
+            self.responseFunc(msg)
+            self.responseNonce = -1
+            self.responseFunc = False
+        
         # Check if error occured
         if msg.get('ok', False) and msg['ok'] == False:
             print("ERROR:", msg)
             if msg.get('error', False):
                 if msg['error'] == 'out of fuel' and 'out of fuel' in self.event:
+                    self._resend(self.queue)
                     self.event['out of fuel'](self, msg)
                 elif 'error' in self.event: 
                     self.event['error'](self, msg['error'], msg)
@@ -116,6 +135,14 @@ class Client:
             self.event['event'](self, msg['event'], msg['cause'], msg['block'], msg['x'], msg['y'], msg['z'])
 
     #
+    # Handle response messages
+    #
+
+    def _response(self, func):
+        self.responseFunc = func
+        self.responseNonce = self.nonce
+        
+    #
     # Tell & Pay Functions
     #
 
@@ -147,7 +174,9 @@ class Client:
     #
 
     # Retrieves a block at the given structure-local coordinates.
-    def getBlock(self, x, y, z):
+    def getBlock(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+        
         return self._send(
             {
                 "action":"get_block",
@@ -159,7 +188,9 @@ class Client:
         )
 
     # Retrieves the world coordinate location of the (0,0,0)
-    def location(self, x, y, z):
+    def location(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+
         return self._send(
             {
                 "action":"get_location",
@@ -169,9 +200,11 @@ class Client:
                 "nonce": self.nonce
             }
         )
-
+        
     # Retrieves the inner size of the structure.
-    def getSize(self, x, y, z):
+    def getSize(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+        
         return self._send(
             {
                 "action":"get_size",
@@ -209,7 +242,9 @@ class Client:
             })
 
     # Retrieves the text of a sign at the given coordinates.
-    def getSignText(self, x, y, z):
+    def getSignText(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+        
         return self._send(
             {
                 "action":"get_sign_text",
@@ -323,14 +358,18 @@ class Client:
         )
 
     # Gets all entities inside the region.
-    def getEntities(self):
+    def getEntities(self, responseFunc):
+        self._response(responseFunc)
+        
         return self._send({
                 "action":"get_entities",
                 "nonce": self.nonce
             })
 
     # Gets all items from a container such as a chest or hopper.
-    def getInventory(self, x, y, z):
+    def getInventory(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+
         return self._send({
                 "action":"get_inventory",
                 "x": x,
@@ -360,7 +399,9 @@ class Client:
             })
 
     # Gets a block's redstone power level.
-    def getPowerLevel(self, x, y, z):
+    def getPowerLevel(self, responseFunc, x, y, z):
+        self._response(responseFunc)
+
         return self._send({
                 "action":"get_power_level",
                 "x": x,
@@ -381,7 +422,9 @@ class Client:
             })
 
     # Fuel Info API
-    def fuelInfo(self):
+    def fuelInfo(self, responseFunc):
+        self._response(responseFunc)
+
         return self._send(
             {
                 "action": "fuelinfo",
@@ -400,7 +443,7 @@ class Client:
             self.y = y
             self.z = z
     
-        def item(self):
+        def item(self):            
             return {
                     "index": self.index,
                     "x": self.x,
