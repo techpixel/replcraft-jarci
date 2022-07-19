@@ -1,5 +1,8 @@
 name: package-publish
-on: [push]
+on: 
+  push:
+    branches:
+      - master
 jobs:
   build-n-publish:
     name: Automatically build and publish python package
