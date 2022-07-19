@@ -1,4 +1,4 @@
-name: learn-github-actions
+name: package-publish
 on: [push]
 jobs:
   check-bats-version:
