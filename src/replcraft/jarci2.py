@@ -30,7 +30,7 @@ class Client:
         self._recv()
         
         # Run open event
-        self.event['open'](self)  
+        self._event('open')(self)  
         
         while True:
             msg = self._recv()
