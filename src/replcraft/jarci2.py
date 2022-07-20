@@ -290,6 +290,7 @@ class Client:
                     x (int): X coordinate
                     y (int): Y coordinate
                     z (int): Z coordinate
+                    lines (list): Lines to set
                 Returns:
                     dict
         """
