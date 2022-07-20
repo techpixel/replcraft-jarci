@@ -29,6 +29,9 @@ class Client:
         self._open()
         self._recv()
         
+        # Run open event
+        self.event['open'](self)  
+        
         while True:
             msg = self._recv()
             
