@@ -1,8 +1,9 @@
 name: package-publish
 on: 
+  workflow_dispatch:
   push:
     branches:
-      - master
+      master
 jobs:
   build-n-publish:
     name: Automatically build and publish python package
