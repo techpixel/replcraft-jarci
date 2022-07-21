@@ -116,7 +116,12 @@ class Client:
         
     # Private Recieve Function
     def _recv(self):
-        msg = json.loads(self.ws.recv())
+        msg = self.ws.recv()
+
+        if msg: # Check if message is an empty string, JSON cannot handle empty strings
+            msg = json.loads(msg)
+        else:
+            return
 
         if msg.get('error') == 'out of fuel':
             self._send(self.queue)
